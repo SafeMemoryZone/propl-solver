@@ -10,6 +10,8 @@
 #   nor                         nor
 #   nand                        nand
 #   if and only if (equals)     =
+#   0                           false
+#   1                           true
 
 # Precedences:
 #   not                         very high
