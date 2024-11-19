@@ -81,7 +81,7 @@ class Parser:
         elif not self._is_keyword(self._lookahead):
             return Node(self._consume(self._lookahead), None, "var")
 
-        print_err(f"[Error] Expected primary expression but got {self._lookahead}")
+        print_err(f"[Error] Expected primary expression but got '{self._lookahead}'")
 
     def _parse_high_prec_expr(self):
         tree = self._parse_primary_expr()

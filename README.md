@@ -23,8 +23,8 @@ python3 solver.py [-h] [--ast] <file>
 - nor                         nor
 - nand                        nand
 - if and only if (equals)     =
-- 0                           false
-- 1                           true
+- true                        1
+- false                       0
 ```
 
 ## Example
