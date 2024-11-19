@@ -13,6 +13,7 @@ python3 solver.py [-h] [--ast] <file>
 
 ## Syntax
 
+```
 - variable                    letters, numbers and special symbols
 - not                         !
 - and                         &
@@ -24,6 +25,7 @@ python3 solver.py [-h] [--ast] <file>
 - if and only if (equals)     =
 - 0                           false
 - 1                           true
+```
 
 ## Example
 
