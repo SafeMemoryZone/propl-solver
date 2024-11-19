@@ -105,12 +105,13 @@ class Parser:
             self._consume("=")
             tree = Node(tree, self._parse_med_prec_expr(), "=") 
 
-        if self._lookahead is not None:
-            print_err("Error: Parser stopped (likely due to a missing junction)")
         return tree
 
     def parse(self):
-        return self._parse_low_prec_expr()
+        expr = self._parse_low_prec_expr()
+        if self._lookahead is not None:
+            print_err("Error: Parser stopped (likely due to a missing junction)")
+        return expr
 
 class Solver:
     def __init__(self, exprs):
