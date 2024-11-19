@@ -52,11 +52,11 @@ class Parser:
 
     def _consume(self, tok):
         if self._curr_pos >= len(self._toks):
-            print_err(f"Error: Expected '{tok}' but got None instead")
+            print_err(f"[Error] Expected '{tok}' but got None instead")
 
         consumed = self._toks[self._curr_pos]
         if consumed != tok:
-            print_err(f"Error: Expected '{tok}' but got '{consumed}' instead")
+            print_err(f"[Error] Expected '{tok}' but got '{consumed}' instead")
 
         self._curr_pos += 1
         self._lookahead = self._toks[self._curr_pos] if self._curr_pos < len(self._toks) else None
@@ -79,7 +79,7 @@ class Parser:
         elif not self._is_keyword(self._lookahead):
             return Node(self._consume(self._lookahead), None, "var")
 
-        print_err(f"Error: Expected primary expression but got {self._lookahead}")
+        print_err(f"[Error] Expected primary expression but got {self._lookahead}")
 
     def _parse_high_prec_expr(self):
         tree = self._parse_primary_expr()
@@ -110,7 +110,7 @@ class Parser:
     def parse(self):
         expr = self._parse_low_prec_expr()
         if self._lookahead is not None:
-            print_err("Error: Parser stopped (likely due to a missing junction)")
+            print_err("[Error] Parser stopped (likely due to a missing junction)")
         return expr
 
 class Solver:
@@ -156,6 +156,7 @@ class Solver:
             return not self._solve_expr(expr.left_val) or self._solve_expr(expr.right_val)
 
     def solve(self):
+        solution_count = 0
         for _ in range(2 ** len(self.vars)):
             is_true = True
             for expr in self.exprs:
@@ -163,8 +164,14 @@ class Solver:
                     is_true = False
                     break
             if is_true:
-                print(f"Found a solution: {self.vars} and {self.values}")
+                solution_count += 1
+                print("[Info] Found a solution: ", end="")
+                for idx, var in enumerate(self.vars):
+                    print(f"{var}={self.values[idx]}", end=" ")
+                print()
             self._next_combination()
+
+        print(f"[Info] {solution_count} out of {2 ** len(self.vars)} possible results are solutions.")
 
 def tokenize_expr(expr):
     return re.findall(r"\w+|\S", expr.strip())
@@ -174,17 +181,17 @@ def print_err(*args):
     exit(1)
 
 def print_usage():
-    print(f"Usage: python3 {sys.argv[0]} [-s <file>]")
-    print("    -s <file> : Parses and solves linked boolean algebra expressions from each line of the specified file.")
+    print(f"Usage: python3 {sys.argv[0]} [-h] [--ast] <file>")
+    print("     -h     : Print usage and exit.")
+    print("     --ast  : Print parsed abstract syntax tree (AST).")
+    print("     <file> : Parses and solves linked boolean algebra expressions from each line of the specified file.")
     print_err()
 
 def print_exprs(exprs):
-    i = 1
-    for expr in exprs:
-        print(f"Expression {i}:")
+    for idx, expr in enumerate(exprs):
+        print(f"Expression {idx + 1}:")
         expr.print()
         print()
-        i += 1
 
 def get_vars_expr(expr, curr_vars):
     if isinstance(expr, Node):
@@ -202,12 +209,20 @@ def get_vars_expr_list(exprs):
 
     return curr_vars
 
-def main():
+def parse_args():
     if len(sys.argv) < 2:
+        print_usage()
+
+    args = (sys.argv[-1], sys.argv[-1] != "--ast" and "--ast" in sys.argv, sys.argv[-1] != "-h" and "-h" in sys.argv)
+    return args
+
+def main():
+    args = parse_args()
+    if args[2]:
         print_usage()
     try:
         parsed_exprs = []
-        with open(sys.argv[1], "r") as f:
+        with open(args[0], "r") as f:
             for expr in f:
                 tokens = tokenize_expr(expr)
                 if len(tokens) == 0:
@@ -215,12 +230,13 @@ def main():
                 parser = Parser(tokens)
                 parsed_exprs.append(parser.parse())
 
-        print_exprs(parsed_exprs)
+        if args[1]:
+            print_exprs(parsed_exprs)
         solver = Solver(parsed_exprs)
         solver.solve()
 
     except FileNotFoundError:
-        print_err(f"Error: Unable to open file '{sys.argv[1]}'")
+        print_err(f"[Error] Unable to open file '{args[0]}'")
 
 if __name__ == "__main__":
     main()
